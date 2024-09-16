@@ -1,0 +1,85 @@
+Teste de linha de log
+essa linha tem um fix de new order 8=FIX.4.49=14835=D34=108049=TESTBUY152=20180920-18:14:19.50856=TESTSELL111=63673064027889863415=USD21=238=700040=154=155=MSFT60=20180920-18:14:19.49210=092 nela
+Linha de log 1: Exemplo de log aleatório
+Linha de log 2: Outro exemplo de log
+Linha de log 3: Log de teste com dados
+Linha de log 4: Informações de sistema
+Linha de log 5: Erro encontrado no sistema
+Linha de log 6: Conexão estabelecida
+Linha de log 7: Transação realizada com sucesso
+Linha de log 8: Aviso: espaço em disco baixo
+Linha de log 9: Atualização de software iniciada
+Linha de log 10: Backup concluído
+Linha de log 11: Usuário logado
+Linha de log 12: Usuário desconectado
+Linha de log 13: Senha alterada
+Linha de log 14: Configuração salva
+Linha de log 15: Erro de autenticação
+Linha de log 16: Requisição recebida
+Linha de log 17: Resposta enviada
+Linha de log 18: Tempo de resposta: 200ms
+Linha de log 19: Serviço iniciado
+Linha de log 20: Serviço parado
+essa linha tem um fix de execution report 8=FIX.4.49=28935=834=109049=TESTSELL152=20180920-18:23:53.67156=TESTBUY16=113.3511=63673064027889863414=3500.000000000015=USD17=2063673064633531000021=231=113.3532=350037=2063673064633531000038=700039=140=154=155=MSFT60=20180920-18:23:53.531150=F151=3500453=1448=BRK2447=D452=110=151
+Linha de log 21: Exemplo de log aleatório
+Linha de log 22: Outro exemplo de log
+Linha de log 23: Log de teste com dados
+Linha de log 24: Informações de sistema
+Linha de log 25: Erro encontrado no sistema
+Linha de log 26: Conexão estabelecida
+Linha de log 27: Transação realizada com sucesso
+Linha de log 28: Aviso: espaço em disco baixo
+Linha de log 29: Atualização de software iniciada
+Linha de log 30: Backup concluído
+Linha de log 31: Usuário logado
+Linha de log 32: Usuário desconectado
+Linha de log 33: Senha alterada
+Linha de log 34: Configuração salva
+Linha de log 35: Erro de autenticação
+Linha de log 36: Requisição recebida
+Linha de log 37: Resposta enviada
+Linha de log 38: Tempo de resposta: 200ms
+Linha de log 39: Serviço iniciado
+Linha de log 40: Serviço parado
+essa linha tem um fix de logon 8=FIX.4.49=7535=A34=109249=TESTBUY152=20180920-18:24:59.64356=TESTSELL198=0108=6010=178
+Liha de kig 41: Exemplo de log aleatório
+Linha de log 42: Outro exemplo de log
+Linha de log 43: Log de teste com dados
+Linha de log 44: Informações de sistema
+Linha de log 45: Erro encontrado no sistema
+Linha de log 46: Conexão estabelecida
+Linha de log 47: Transação realizada com sucesso
+Linha de log 48: Aviso: espaço em disco baixo
+Linha de log 49: Atualização de software iniciada
+Linha de log 50: Backup concluído
+Linha de log 51: Usuário logado
+Linha de log 52: Usuário desconectado
+Linha de log 53: Senha alterada
+Linha de log 54: Configuração salva
+Linha de log 55: Erro de autenticação
+Linha de log 56: Requisição recebida
+Linha de log 57: Resposta enviada
+Linha de log 58: Tempo de resposta: 200ms
+Linha de log 59: Serviço iniciado
+Linha de log 60: Serviço parado
+essa linha tem um fix de logout 8=FIX.4.49=7535=534=109449=TESTBUY152=20180920-18:25:59.64356=TESTSELL110=178
+Linha de log 61: Exemplo de log aleatório
+Linha de log 62: Outro exemplo de log
+Linha de log 63: Log de teste com dados
+Linha de log 64: Informações de sistema
+Linha de log 65: Erro encontrado no sistema
+Linha de log 66: Conexão estabelecida
+Linha de log 67: Transação realizada com sucesso
+Linha de log 68: Aviso: espaço em disco baixo
+Linha de log 69: Atualização de software iniciada
+Linha de log 70: Backup concluído
+Linha de log 71: Usuário logado
+Linha de log 72: Usuário desconectado
+Linha de log 73: Senha alterada
+Linha de log 74: Configuração salva
+Linha de log 75: Erro de autenticação
+Linha de log 76: Requisição recebida
+Linha de log 77: Resposta enviada
+Linha de log 78: Tempo de resposta: 200ms
+Linha de log 79: Serviço iniciado
+Linha de log 80: Serviço parado

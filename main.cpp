@@ -3,6 +3,7 @@
 #include <QApplication>
 #include <QLocale>
 #include <QTranslator>
+#include <QScreen>
 
 int main(int argc, char *argv[])
 {
@@ -18,6 +19,21 @@ int main(int argc, char *argv[])
         }
     }
     MainWindow w;
-    w.show();
+    // Seta o tamanho da janela para 800x600 e centraliza
+    w.resize(800, 600);
+    // Pega a posição do mouse
+    QPoint globalCursorPos = QCursor::pos();
+    // Move a janela para a posição do mouse
+    qDebug() << "Mouse is in: " << globalCursorPos;
+    qDebug() << "There are " << QApplication::screens().size() << " screens";
+    for(auto screen : QApplication::screens()) {
+        qDebug() << "Screen: " << screen->geometry();
+        if(screen->geometry().contains(globalCursorPos))
+        {
+            w.move(screen->geometry().center() - w.rect().center());
+            break;
+        }
+    }
+    w.showNormal();
     return a.exec();
 }

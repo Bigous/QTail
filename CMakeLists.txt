@@ -9,8 +9,8 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets LinguistTools)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets LinguistTools)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets LinguistTools Concurrent)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets LinguistTools Concurrent)
 
 set(TS_FILES QTail_pt_BR.ts)
 
@@ -26,21 +26,18 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(QTail
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
-        DockOverlay.hpp
-    )
-# Define target properties for Android with Qt 6 as:
-#    set_property(TARGET QTail APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
-#                 ${CMAKE_CURRENT_SOURCE_DIR}/android)
-# For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation
 
+        tailfilewidget.h tailfilewidget.cpp
+        filemonitor.h filemonitor.cpp
+        highlighter.h highlighter.cpp
+        highlightedtextedit.h highlightedtextedit.cpp
+    )
     qt_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
 else()
     if(ANDROID)
         add_library(QTail SHARED
             ${PROJECT_SOURCES}
         )
-# Define properties for Android with Qt 5 after find_package() calls as:
-#    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
     else()
         add_executable(QTail
             ${PROJECT_SOURCES}
@@ -50,18 +47,9 @@ else()
     qt5_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
 endif()
 
-target_link_libraries(QTail PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+target_link_libraries(QTail PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Concurrent)
 
-# Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
-# If you are developing for iOS or macOS you should consider setting an
-# explicit, fixed bundle identifier manually though.
-if(${QT_VERSION} VERSION_LESS 6.1.0)
-  set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.example.QTail)
-endif()
 set_target_properties(QTail PROPERTIES
-    ${BUNDLE_ID_OPTION}
-    MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
-    MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
     MACOSX_BUNDLE TRUE
     WIN32_EXECUTABLE TRUE
 )
@@ -72,6 +60,22 @@ install(TARGETS QTail
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
+
+# Adicionar os diretórios assets/fonts e assets/imgs
+set(ASSETS_DIR "${CMAKE_SOURCE_DIR}/assets")
+set(FONTS_DIR "${ASSETS_DIR}/fonts")
+set(IMGS_DIR "${ASSETS_DIR}/imgs")
+set(LICENSES_DIR "${ASSETS_DIR}/licenses")
+
+# Certifique-se de que o diretório de destino dos assets seja criado
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/assets)
+
+# Copiar as pastas assets para o diretório de build
+add_custom_command(TARGET QTail POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    ${ASSETS_DIR} $<TARGET_FILE_DIR:QTail>/assets
+)
+
 
 if(QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(QTail)
