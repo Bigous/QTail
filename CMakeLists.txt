@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 3.16)
 
 project(QTail VERSION 0.1 LANGUAGES CXX)
 
+# Informações sobre o autor
+set(PROJECT_AUTHOR "Richard Natal")
+
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
@@ -23,15 +26,28 @@ set(PROJECT_SOURCES
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    qt_add_executable(QTail
-        MANUAL_FINALIZATION
-        ${PROJECT_SOURCES}
+    if(WIN32)
+        qt_add_executable(QTail
+            MANUAL_FINALIZATION
+            ${PROJECT_SOURCES}
 
-        tailfilewidget.h tailfilewidget.cpp
-        filemonitor.h filemonitor.cpp
-        highlighter.h highlighter.cpp
-        highlightedtextedit.h highlightedtextedit.cpp
-    )
+            tailfilewidget.h tailfilewidget.cpp
+            filemonitor.h filemonitor.cpp
+            highlighter.h highlighter.cpp
+            highlightedtextedit.h highlightedtextedit.cpp
+            version.rc
+        )
+    else()
+        qt_add_executable(QTail
+            MANUAL_FINALIZATION
+            ${PROJECT_SOURCES}
+
+            tailfilewidget.h tailfilewidget.cpp
+            filemonitor.h filemonitor.cpp
+            highlighter.h highlighter.cpp
+            highlightedtextedit.h highlightedtextedit.cpp
+        )
+    endif()
     qt_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
 else()
     if(ANDROID)
@@ -79,4 +95,60 @@ add_custom_command(TARGET QTail POST_BUILD
 
 if(QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(QTail)
+endif()
+
+# Define o nome do arquivo zip
+set(OUTPUT_ZIP "${CMAKE_BINARY_DIR}/QTail-Release.zip")
+
+# Comando para empacotar arquivos no Windows (usando windeployqt e PowerShell)
+if(WIN32)
+    set(QT_DEPLOY_TOOL "R:/Richard/tools/Qt/6.7.2/msvc2019_64/bin/windeployqt6.exe")
+    set(RELEASE_DIR "$<TARGET_FILE_DIR:QTail>/release")
+    set(RELEASE_ADD_DIR "$<TARGET_FILE_DIR:QTail>/release/*")
+    add_custom_command(TARGET QTail POST_BUILD
+        # Remove o diretório de release anterior
+        COMMAND ${CMAKE_COMMAND} -E echo "Removing old release directory..."
+        COMMAND ${CMAKE_COMMAND} -E remove_directory ${RELEASE_DIR}
+
+        # Ajuste o windeployqt para incluir apenas o necessário
+        COMMAND ${CMAKE_COMMAND} -E echo "Running windeployqt..."
+        COMMAND ${QT_DEPLOY_TOOL} --release --no-opengl --translations pt_BR --no-compiler-runtime $<TARGET_FILE:QTail> --dir ${RELEASE_DIR}
+
+        COMMAND ${CMAKE_COMMAND} -E echo "Packaging release files for Windows..."
+        COMMAND powershell -Command "Compress-Archive -Force -Path $<TARGET_FILE:QTail>, ${RELEASE_ADD_DIR}, ${ASSETS_DIR} -DestinationPath ${OUTPUT_ZIP}"
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+        COMMENT "Generating release zip package (Windows)"
+        VERBATIM
+    )
+# Comando para empacotar arquivos no macOS (usando macdeployqt)
+elseif(APPLE)
+    add_custom_command(TARGET QTail POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E echo "Running macdeployqt..."
+        COMMAND macdeployqt $<TARGET_FILE:QTail> -dmg
+        COMMAND ${CMAKE_COMMAND} -E echo "Packaging release files for macOS..."
+        COMMAND ${CMAKE_COMMAND} -E tar "cfv" ${OUTPUT_ZIP} --format=zip
+            $<TARGET_FILE:QTail>               # Executável
+            ${ASSETS_DIR}    # Pasta de assets
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+        COMMENT "Generating release zip package (macOS)"
+        VERBATIM
+    )
+# Comando para empacotar arquivos no Linux (usando linuxdeployqt)
+elseif(UNIX)
+    add_custom_command(TARGET QTail POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E echo "Running linuxdeployqt..."
+        COMMAND linuxdeployqt $<TARGET_FILE:QTail> -bundle -appimage
+        COMMAND ${CMAKE_COMMAND} -E echo "Packaging release files for Linux..."
+        COMMAND ${CMAKE_COMMAND} -E tar "cfv" ${OUTPUT_ZIP} --format=zip
+            $<TARGET_FILE:QTail>               # Executável
+            ${ASSETS_DIR}    # Pasta de assets
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+        COMMENT "Generating release zip package (Linux)"
+        VERBATIM
+    )
+endif()
+
+# Isso só será ativado em builds do tipo Release
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+    add_custom_target(create_zip ALL DEPENDS QTail)
 endif()
