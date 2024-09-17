@@ -3,10 +3,10 @@
 
 #include <QDockWidget>
 #include <QTextEdit>
-#include <QTableWidget>
 #include <QRegularExpression>
 #include "filemonitor.h"
 #include "highlighter.h"
+#include "fixtable.h"
 
 class TailFileWidget : public QDockWidget {
     Q_OBJECT
@@ -20,16 +20,13 @@ private slots:
 
 private:
     QTextEdit* textEdit;
-    QTableWidget* fixTable;
+    FixTable* fixTable;
     FileMonitor* fileMonitor;
     QList<Highlighter*> highlighters;
     QRegularExpression fixRegex;
 
-    void processFixLine(const QString& line);
     void setupFixTable();
     QString getCurrentLine();
-    void addFilterRow();
-    void filterTable(int column, const QString& filterText);
 };
 
 #endif // TAILFILEWIDGET_H
