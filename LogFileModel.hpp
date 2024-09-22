@@ -40,6 +40,7 @@ public:
             return;
         m_stopRequested = true;
         QCoro::waitFor(m_task);
+
         m_lines.clear();
         m_buffers.clear();
     }
@@ -85,8 +86,8 @@ private slots:
 
 private:
     QString m_fileName;
-    std::deque<QByteArrayView> m_lines;
-    std::deque<QByteArray> m_buffers;
+    QList<QByteArrayView> m_lines;
+    QList<QByteArray> m_buffers;
     QFile m_file;
     QCoro::Task<void> m_task;
     bool m_lastLineWasIncomplete = false;
