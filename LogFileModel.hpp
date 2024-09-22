@@ -56,7 +56,6 @@ public:
         if (!index.isValid() || index.row() >= m_lines.size() || role != Qt::DisplayRole)
             return QVariant();
 
-
         QString displayText = QString::fromUtf8(m_lines[index.row()]);
 
         QRegularExpressionMatchIterator it = m_controlChars.globalMatch(displayText);

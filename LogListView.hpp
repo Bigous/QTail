@@ -32,8 +32,43 @@ public:
             painter->fillRect(option.rect, m_selectionColor);  // Cor azul para seleção (RGB)
         }
 
+        QString displayText = opt.text;
+
+        painter->save();  // Salvar o estado atual do QPainter
+
         // Desenhar o item como normalmente
-        QStyledItemDelegate::paint(painter, opt, index);
+        // QStyledItemDelegate::paint(painter, opt, index);
+
+        QFontMetrics metrics(opt.font);
+
+        int charWidth = metrics.horizontalAdvance(' ');
+
+        int x = opt.rect.x() + opt.widget->style()->pixelMetric(QStyle::PM_FocusFrameHMargin, &opt, opt.widget);  // Posição inicial de x
+
+        // Desenhar cada caractere individualmente
+        for (int i = 0; i < displayText.length(); ++i) {
+            QRect charRect(x, opt.rect.y(), charWidth, opt.rect.height());
+
+            if (displayText[i].unicode() >= 0x2400 && displayText[i].unicode() <= 0x241F) {
+                // Pintar o fundo vermelho para caracteres de controle
+                painter->fillRect(charRect, QColor(255, 0, 0));  // Fundo vermelho
+            }
+
+            opt.widget->style()->drawItemText(
+                painter,
+                charRect,
+                Qt::AlignVCenter,
+                opt.palette,
+                true,
+                QString(displayText[i].unicode())
+                );
+            //painter->drawText(charRect, Qt::AlignVCenter, QString(displayText[i]));
+
+            x += charWidth;  // Avançar para o próximo caractere
+        }
+
+        // Restaurar o estado do painter
+        painter->restore();
     }
 
 private:

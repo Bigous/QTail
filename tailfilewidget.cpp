@@ -9,7 +9,7 @@
 #include "highlightedtextedit.h"
 
 TailFileWidget::TailFileWidget(const QString& filePath, FixDictionary *fixDictionary, QWidget* parent)
-    : QDockWidget(parent), fixRegex(QRegularExpression("8=FIX.*\x01")) {
+    : QDockWidget(parent), fixRegex(QRegularExpression("8=FIX.*\u2401")) {
 
     m_fixDictionary = fixDictionary;
 
@@ -60,7 +60,7 @@ void TailFileWidget::addHighlighter(Highlighter* highlighter) {
 
 void TailFileWidget::processFixLine(const QString& line) {
     // Exemplo simples de processamento de uma linha do protocolo FIX
-    QStringList fields = line.split("\x01");
+    QStringList fields = line.split("\u2401");
     fixTable->setRowCount(fields.size());
 
     int row = 1;
