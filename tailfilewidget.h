@@ -6,20 +6,17 @@
 #include <QTableWidget>
 #include <QRegularExpression>
 #include "LogFileModel.hpp"
-#include "highlighter.h"
 #include "FixDictionary.hpp"
 
 class TailFileWidget : public QDockWidget {
     Q_OBJECT
 public:
     TailFileWidget(const QString& filePath, FixDictionary *fixDictionary , QWidget* parent = nullptr);
-    void addHighlighter(Highlighter* highlighter);
 
 private:
     QListView* listView;
     QTableWidget* fixTable;
     LogFileModel* fileModel;
-    QList<Highlighter*> highlighters;
     QRegularExpression fixRegex;
     FixDictionary* m_fixDictionary;
 

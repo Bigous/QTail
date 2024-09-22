@@ -54,8 +54,8 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
 
             tailfilewidget.h tailfilewidget.cpp
 
-            highlighter.h highlighter.cpp
-            highlightedtextedit.h highlightedtextedit.cpp
+
+
             version.rc
             LogFileModel.hpp
             LogListView.hpp

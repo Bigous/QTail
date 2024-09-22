@@ -6,7 +6,6 @@
 #include <QLineEdit>
 
 #include "LogListView.hpp"
-#include "highlightedtextedit.h"
 
 TailFileWidget::TailFileWidget(const QString& filePath, FixDictionary *fixDictionary, QWidget* parent)
     : QDockWidget(parent), fixRegex(QRegularExpression("8=FIX.*\u2401")) {
@@ -52,10 +51,6 @@ TailFileWidget::TailFileWidget(const QString& filePath, FixDictionary *fixDictio
     // Setup da tabela de FIX, inicialmente escondida
     setupFixTable();
     fixTable->setVisible(false);
-}
-
-void TailFileWidget::addHighlighter(Highlighter* highlighter) {
-    highlighters.append(highlighter);
 }
 
 void TailFileWidget::processFixLine(const QString& line) {
