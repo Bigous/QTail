@@ -53,8 +53,10 @@ public:
         // Posição inicial de x
         int x = opt.rect.x() + opt.widget->style()->pixelMetric(QStyle::PM_FocusFrameHMargin, &opt, opt.widget);
 
-        // Inicializar uma lista de intervalos destacados
-        QList<QPair<int, int>> matchedRanges;  // Guardará os intervalos correspondentes e suas cores
+        QRect lineRect(x, opt.rect.y(),
+                       metrics.horizontalAdvance(displayText), opt.rect.height());
+
+        painter->drawText(lineRect, Qt::AlignLeft | Qt::AlignVCenter, displayText);
 
         // Iterar sobre as regras de highlight
         for (const auto &rule : m_highlightRules) {
@@ -62,10 +64,6 @@ public:
             while (it.hasNext()) {
                 QRegularExpressionMatch match = it.next();
                 int start = match.capturedStart();
-                int length = match.capturedLength();
-
-                // Armazenar o intervalo e as informações da cor
-                matchedRanges.append(qMakePair(start, length));
 
                 // Desenhar o texto destacado
                 QString matchedText = match.captured();
@@ -82,31 +80,6 @@ public:
 
                 painter->drawText(matchRect, Qt::AlignLeft | Qt::AlignVCenter, matchedText);
             }
-        }
-
-        // Desenhar o restante do texto que não foi destacado
-        int lastIndex = 0;
-        for (const auto &range : matchedRanges) {
-            int start = range.first;
-            if (lastIndex < start) {
-                QString normalText = displayText.mid(lastIndex, start - lastIndex);
-                QRect textRect(x + metrics.horizontalAdvance(displayText.left(lastIndex)), opt.rect.y(),
-                               metrics.horizontalAdvance(normalText), opt.rect.height());
-
-                // Desenhar o texto normal
-                painter->setPen(opt.palette.text().color());
-                painter->drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter, normalText);
-            }
-            lastIndex = start + range.second;
-        }
-
-        // Desenhar o texto restante após a última correspondência
-        if (lastIndex < displayText.length()) {
-            QString remainingText = displayText.mid(lastIndex);
-            QRect textRect(x + metrics.horizontalAdvance(displayText.left(lastIndex)), opt.rect.y(),
-                           metrics.horizontalAdvance(remainingText), opt.rect.height());
-            painter->setPen(opt.palette.text().color());
-            painter->drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter, remainingText);
         }
 
         // Restaurar o estado do painter
