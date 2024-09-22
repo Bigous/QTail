@@ -22,7 +22,7 @@ public:
 
         m_delegate = new LogItemDelegate(this);
 
-        m_delegate->addHighlightRule(QRegularExpression("[\u2400-\u240F]"), true, QColor(255, 0, 0), false, Qt::black);
+        m_delegate->addHighlightRule(QRegularExpression("[\u2400-\u240F]"), true, Qt::red);
 
         setItemDelegate(m_delegate);
 

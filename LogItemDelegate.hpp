@@ -14,7 +14,7 @@ public:
 
     void addHighlightRule(const QRegularExpression &regex,
                           bool useBackgroundColor = true,
-                          const QColor &backgroundColor = QColor(255, 255, 0),
+                          const QColor &backgroundColor = Qt::yellow,
                           bool useForegroundColor = false,
                           const QColor &foregroundColor = Qt::black
                           ) {
