@@ -60,6 +60,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
             LogFileModel.hpp
             LogListView.hpp
             FixDictionary.hpp
+            LogItemDelegate.hpp
 
         )
     else()
