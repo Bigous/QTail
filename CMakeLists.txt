@@ -59,6 +59,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
             version.rc
             LogFileModel.hpp
             LogListView.hpp
+            FixDictionary.hpp
 
         )
     else()
@@ -136,7 +137,7 @@ if(WIN32)
 
         # Ajuste o windeployqt para incluir apenas o necessário
         COMMAND ${CMAKE_COMMAND} -E echo "Running windeployqt..."
-        COMMAND ${QT_DEPLOY_TOOL} --release --no-opengl --translations pt_BR --no-compiler-runtime --include-plugins qico $<TARGET_FILE:QTail> --dir ${RELEASE_DIR}
+        COMMAND ${QT_DEPLOY_TOOL} --release --no-opengl --translations pt_BR --include-plugins qico $<TARGET_FILE:QTail> --dir ${RELEASE_DIR}
 
         COMMAND ${CMAKE_COMMAND} -E echo "Packaging release files for Windows..."
         COMMAND powershell -Command "Compress-Archive -Force -Path $<TARGET_FILE:QTail>, ${RELEASE_ADD_DIR}, ${ASSETS_DIR} -DestinationPath ${OUTPUT_ZIP}"

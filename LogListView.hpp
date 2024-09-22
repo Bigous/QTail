@@ -12,7 +12,7 @@
 class LogItemDelegate : public QStyledItemDelegate {
 public:
     explicit LogItemDelegate(QObject *parent = nullptr)
-        : QStyledItemDelegate(parent) {}
+        : QStyledItemDelegate(parent), m_selectionColor(0, 96, 192) {}
 
     // Sobrescrever o sizeHint para ajustar a altura de cada item
     QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override {
@@ -21,6 +21,23 @@ public:
         int height = metrics.height() * dpiScale;  // Altura ajustada pela escala
         return QSize(option.rect.width(), height);  // Usar a altura ajustada
     }
+
+    // Sobrescrever o paint para customizar a cor de fundo da linha selecionada
+    void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override {
+        QStyleOptionViewItem opt = option;
+        initStyleOption(&opt, index);
+
+        // Verificar se o item está selecionado e ajustar o fundo
+        if (option.state & QStyle::State_Selected) {
+            painter->fillRect(option.rect, m_selectionColor);  // Cor azul para seleção (RGB)
+        }
+
+        // Desenhar o item como normalmente
+        QStyledItemDelegate::paint(painter, opt, index);
+    }
+
+private:
+    QColor m_selectionColor;
 };
 
 class LogListView : public QListView {

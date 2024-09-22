@@ -7,11 +7,12 @@
 #include <QRegularExpression>
 #include "LogFileModel.hpp"
 #include "highlighter.h"
+#include "FixDictionary.hpp"
 
 class TailFileWidget : public QDockWidget {
     Q_OBJECT
 public:
-    TailFileWidget(const QString& filePath, QWidget* parent = nullptr);
+    TailFileWidget(const QString& filePath, FixDictionary *fixDictionary , QWidget* parent = nullptr);
     void addHighlighter(Highlighter* highlighter);
 
 private:
@@ -20,6 +21,7 @@ private:
     LogFileModel* fileModel;
     QList<Highlighter*> highlighters;
     QRegularExpression fixRegex;
+    FixDictionary* m_fixDictionary;
 
     void processFixLine(const QString& line);
     void setupFixTable();
