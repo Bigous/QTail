@@ -11,13 +11,14 @@
 #include <QFuture>
 #include <QCoroTask>
 #include <QCoroIODevice>
+#include <QRegularExpression>
 
 class LogFileModel : public QAbstractListModel {
     Q_OBJECT
 
 public:
     explicit LogFileModel(const QString& filePath, QObject *parent = nullptr)
-        : QAbstractListModel(parent), m_file(filePath), m_fileName(filePath) {
+        : QAbstractListModel(parent), m_file(filePath), m_fileName(filePath), m_controlChars("[\\x00-\\x1F]") {
 
     }
 
@@ -55,7 +56,24 @@ public:
         if (!index.isValid() || index.row() >= m_lines.size() || role != Qt::DisplayRole)
             return QVariant();
 
-        return QString::fromUtf8(m_lines[index.row()]);
+
+        QString displayText = QString::fromUtf8(m_lines[index.row()]);
+
+        QRegularExpressionMatchIterator it = m_controlChars.globalMatch(displayText);
+
+        // Iterar sobre cada correspondência de caractere de controle
+        while (it.hasNext()) {
+            QRegularExpressionMatch match = it.next();
+            char controlChar = match.captured(0).at(0).toLatin1();
+
+            // Substituir o caractere de controle pelo correspondente na faixa 0x2400
+            QString replacement = QString(QChar(0x2400 + controlChar));
+
+            // Substituir o caractere no texto original
+            displayText.replace(match.capturedStart(0), 1, replacement);
+        }
+
+        return displayText;
         //return QByteArray(m_lines[index.row()].data(), m_lines[index.row()].size());
     }
 
@@ -74,6 +92,7 @@ private:
     QCoro::Task<void> m_task;
     bool m_lastLineWasIncomplete = false;
     bool m_stopRequested = false;
+    QRegularExpression m_controlChars;
 
     void processBuffer(QByteArray& buffer)
     {
