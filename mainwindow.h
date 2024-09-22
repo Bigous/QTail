@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QFileDialog>
+#include "FixDictionary.hpp"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -17,6 +18,10 @@ public:
     MainWindow(QWidget *parent = nullptr);
     virtual ~MainWindow();
 
+    bool loadDictionary(const QString& path) {
+        return m_fixDictionary.loadDictionary(path);
+    }
+
 protected:
     void onDockWidgetToggled(QDockWidget* dockWidget);
 
@@ -27,6 +32,7 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
+    FixDictionary m_fixDictionary;
 };
 
 #endif // MAINWINDOW_H

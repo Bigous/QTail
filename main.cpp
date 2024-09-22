@@ -60,9 +60,10 @@ int main(int argc, char *argv[])
     MainWindow w;
 
     w.setWindowIcon(icon);
+    w.loadDictionary("./assets/fix/FIX44.xml");
 
     // Seta o tamanho da janela para 800x600 e centraliza
-    w.resize(800, 600);
+    w.resize(1024, 768);
     for(auto screen : QApplication::screens()) {
         qDebug() << "Screen: " << screen->geometry();
         if(screen->geometry().contains(globalCursorPos))

@@ -7,7 +7,7 @@
 #include "tailfilewidget.h"
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent), ui(new Ui::MainWindow) {
+    : QMainWindow(parent), ui(new Ui::MainWindow), m_fixDictionary(this) {
     static int i = 1;
     setTabPosition(Qt::AllDockWidgetAreas, QTabWidget::North); // Abas no topo
 
@@ -32,7 +32,7 @@ void MainWindow::openFile() {
         QString fileName = fileInfo.fileName();  // Apenas o nome do arquivo
 
         // Criar uma nova TailFileWidget com o arquivo selecionado
-        TailFileWidget* tailFileWidget = new TailFileWidget(filePath, this);
+        TailFileWidget* tailFileWidget = new TailFileWidget(filePath, &m_fixDictionary, this);
         tailFileWidget->setAllowedAreas(Qt::AllDockWidgetAreas);
 
         tailFileWidget->setWindowTitle(tr("%1").arg(filePath));

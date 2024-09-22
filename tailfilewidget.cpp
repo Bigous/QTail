@@ -8,8 +8,10 @@
 #include "LogListView.hpp"
 #include "highlightedtextedit.h"
 
-TailFileWidget::TailFileWidget(const QString& filePath, QWidget* parent)
+TailFileWidget::TailFileWidget(const QString& filePath, FixDictionary *fixDictionary, QWidget* parent)
     : QDockWidget(parent), fixRegex(QRegularExpression("8=FIX.*\x01")) {
+
+    m_fixDictionary = fixDictionary;
 
     fileModel = new LogFileModel(filePath, this);
     listView = new LogListView(fileModel, this);
@@ -40,6 +42,7 @@ TailFileWidget::TailFileWidget(const QString& filePath, QWidget* parent)
             if (match.hasMatch()) {
                 processFixLine(match.captured());
                 fixTable->setVisible(true); // Mostra a tabela
+                //QMetaObject::invokeMethod(fixTable, "resizeColumnsToContents", Qt::QueuedConnection);
             } else {
                 fixTable->setVisible(false); // Esconde a tabela
             }
@@ -66,12 +69,16 @@ void TailFileWidget::processFixLine(const QString& line) {
         if (tagValue.size() == 2) {
             QString tag = tagValue[0];
             QString value = tagValue[1];
+            QString tagName;
+            QString valueDescription;
+
+            m_fixDictionary->TryGetTagNameAndFieldValueDescription(tag.toInt(), value, tagName, valueDescription);
 
             // Preencher a tabela (você pode adicionar a lógica para preencher Tag Name e Domain Description)
             fixTable->setItem(row, 0, new QTableWidgetItem(tag));
             fixTable->setItem(row, 1, new QTableWidgetItem(value));
-            fixTable->setItem(row, 2, new QTableWidgetItem("Tag Name")); // Exemplo
-            fixTable->setItem(row, 3, new QTableWidgetItem("Domain Description")); // Exemplo
+            fixTable->setItem(row, 2, new QTableWidgetItem(tagName));
+            fixTable->setItem(row, 3, new QTableWidgetItem(valueDescription));
             row++;
         }
     }
@@ -80,10 +87,11 @@ void TailFileWidget::processFixLine(const QString& line) {
 void TailFileWidget::setupFixTable() {
     fixTable->setColumnCount(4);
     fixTable->setHorizontalHeaderLabels({"Tag", "Value", "Tag Name", "Domain Description"});
-    fixTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    fixTable->horizontalHeader()->setMinimumSectionSize(50);
+    fixTable->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
     fixTable->setSelectionMode(QAbstractItemView::NoSelection);
     fixTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    fixTable->setSortingEnabled(true); // Habilitar ordenação
+    fixTable->setSortingEnabled(false); // nao Habilitar ordenação
 
     // Adicionar linha de filtro
     addFilterRow();
