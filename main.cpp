@@ -7,10 +7,22 @@
 
 int main(int argc, char *argv[])
 {
+#ifndef NDEBUG
+    // Se estiver no modo de depuração, incluir nome do arquivo e número da linha
+    qSetMessagePattern("%{time hh:mm:ss.zzz}|%{file}:%{line}|%{message}");
+#else
+    // Caso contrário, apenas exibir o tempo e a mensagem
+    qSetMessagePattern("%{time hh:mm:ss.zzz}|%{message}");
+#endif
+    qInfo() << "Starting QTail...";
+
     QApplication a(argc, argv);
 
     QTranslator translator;
     const QStringList uiLanguages = QLocale::system().uiLanguages();
+
+    qInfo() << "Setting up translator for locale " << uiLanguages;
+
     for (const QString &locale : uiLanguages) {
         const QString baseName = "QTail_" + QLocale(locale).name();
         if (translator.load(":/i18n/" + baseName)) {
@@ -18,6 +30,9 @@ int main(int argc, char *argv[])
             break;
         }
     }
+
+    qInfo() << "Creating main window";
+
     MainWindow w;
     // Seta o tamanho da janela para 800x600 e centraliza
     w.resize(800, 600);
@@ -35,5 +50,12 @@ int main(int argc, char *argv[])
         }
     }
     w.showNormal();
-    return a.exec();
+
+    qInfo() << "Processing Event Loop.";
+
+    auto ret = a.exec();
+
+    qInfo() << "Exiting QTail with value " << ret;
+
+    return ret;
 }

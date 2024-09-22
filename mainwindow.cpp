@@ -27,10 +27,19 @@ void MainWindow::openFile() {
     QString filePath = QFileDialog::getOpenFileName(this, tr("Open File"), "", tr("All Files (*)"));
 
     if (!filePath.isEmpty()) {
+        // Extrair o nome do arquivo usando QFileInfo
+        QFileInfo fileInfo(filePath);
+        QString fileName = fileInfo.fileName();  // Apenas o nome do arquivo
+
         // Criar uma nova TailFileWidget com o arquivo selecionado
         TailFileWidget* tailFileWidget = new TailFileWidget(filePath, this);
         tailFileWidget->setAllowedAreas(Qt::AllDockWidgetAreas);
+
         tailFileWidget->setWindowTitle(tr("%1").arg(filePath));
+        tailFileWidget->setWindowIconText(fileName);
+
+        // Definir para deletar o widget ao fechar a janela
+        tailFileWidget->setAttribute(Qt::WA_DeleteOnClose);
 
         // Se não houver widgets dockados, docka ele à esquerda. Caso contrário, tabifica junto com o primeiro widget dockado
         if (!findFirstDockWidget()) {
