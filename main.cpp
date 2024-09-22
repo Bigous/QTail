@@ -4,6 +4,7 @@
 #include <QLocale>
 #include <QTranslator>
 #include <QScreen>
+#include <QSplashScreen>
 
 int main(int argc, char *argv[])
 {
@@ -17,6 +18,29 @@ int main(int argc, char *argv[])
     qInfo() << "Starting QTail...";
 
     QApplication a(argc, argv);
+
+    //QString iconPath = QDir(QCoreApplication::applicationDirPath() + "/assets/img/").filePath("app_icon.ico");
+    QIcon icon("./assets/imgs/QTail.ico");
+
+    a.setWindowIcon(icon);
+
+    QPixmap pixmap("./assets/imgs/splash-realista.webp");
+    QSplashScreen splash(pixmap);
+    // Pega a posição do mouse
+    QPoint globalCursorPos = QCursor::pos();
+    // Move a janela para a posição do mouse
+    qDebug() << "Mouse is in: " << globalCursorPos;
+    qDebug() << "There are " << QApplication::screens().size() << " screens";
+    for(auto screen : QApplication::screens()) {
+        qDebug() << "Screen: " << screen->geometry();
+        if(screen->geometry().contains(globalCursorPos))
+        {
+            splash.move(screen->geometry().center() - splash.rect().center());
+            break;
+        }
+    }
+    splash.show();
+
 
     QTranslator translator;
     const QStringList uiLanguages = QLocale::system().uiLanguages();
@@ -34,13 +58,11 @@ int main(int argc, char *argv[])
     qInfo() << "Creating main window";
 
     MainWindow w;
+
+    w.setWindowIcon(icon);
+
     // Seta o tamanho da janela para 800x600 e centraliza
     w.resize(800, 600);
-    // Pega a posição do mouse
-    QPoint globalCursorPos = QCursor::pos();
-    // Move a janela para a posição do mouse
-    qDebug() << "Mouse is in: " << globalCursorPos;
-    qDebug() << "There are " << QApplication::screens().size() << " screens";
     for(auto screen : QApplication::screens()) {
         qDebug() << "Screen: " << screen->geometry();
         if(screen->geometry().contains(globalCursorPos))
@@ -49,7 +71,9 @@ int main(int argc, char *argv[])
             break;
         }
     }
+
     w.showNormal();
+    splash.finish(&w);
 
     qInfo() << "Processing Event Loop.";
 
