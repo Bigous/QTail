@@ -2,7 +2,7 @@
 
 This is a home made tool for monitoring log files with some cool features.
 
-## About Licence
+## About License
 
 You may use it as you want to, but I, in no way, am not responsible for you usage, damage or anithing.
 
