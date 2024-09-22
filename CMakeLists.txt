@@ -54,8 +54,6 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
 
             tailfilewidget.h tailfilewidget.cpp
 
-
-
             version.rc
             LogFileModel.hpp
             LogListView.hpp
