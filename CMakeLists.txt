@@ -5,15 +5,36 @@ project(QTail VERSION 0.1 LANGUAGES CXX)
 # Informações sobre o autor
 set(PROJECT_AUTHOR "Richard Natal")
 
+# Se estiver compilando em Debug
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    message(STATUS "Building in Debug mode")
+    add_definitions(-DQT_DEBUG)
+    # Adiciona o diretório de QCoro ao CMAKE_MODULE_PATH
+    set(QCoro6_DIR "R:/Richard/cmake/debug/qcoro/lib/cmake/QCoro6")
+    set(QCoro6Core_DIR "R:/Richard/cmake/debug/qcoro/lib/cmake/QCoro6Core")
+    set(QCoro6Coro_DIR "R:/Richard/cmake/debug/qcoro/lib/cmake/QCoro6Coro")
+else()
+    message(STATUS "Building in Release mode")
+    # Adiciona o diretório de QCoro ao CMAKE_MODULE_PATH
+    set(QCoro6_DIR "R:/Richard/cmake/release/qcoro/lib/cmake/QCoro6")
+    set(QCoro6Core_DIR "R:/Richard/cmake/release/qcoro/lib/cmake/QCoro6Core")
+    set(QCoro6Coro_DIR "R:/Richard/cmake/release/qcoro/lib/cmake/QCoro6Coro")
+endif()
+
+list(APPEND CMAKE_PREFIX_PATH ${QCoro6_DIR})
+list(APPEND CMAKE_PREFIX_PATH ${QCoro6Core_DIR})
+list(APPEND CMAKE_PREFIX_PATH ${QCoro6Coro_DIR})
+
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets LinguistTools Concurrent)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets LinguistTools Concurrent)
+find_package(QT NAMES Qt6 REQUIRED COMPONENTS Widgets LinguistTools Concurrent)
+find_package(Qt6 REQUIRED COMPONENTS Widgets LinguistTools Concurrent)
+find_package(QCoro6 REQUIRED COMPONENTS Core)
 
 set(TS_FILES QTail_pt_BR.ts)
 
@@ -32,10 +53,13 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
             ${PROJECT_SOURCES}
 
             tailfilewidget.h tailfilewidget.cpp
-            filemonitor.h filemonitor.cpp
+
             highlighter.h highlighter.cpp
             highlightedtextedit.h highlightedtextedit.cpp
             version.rc
+            LogFileModel.hpp
+            LogListView.hpp
+
         )
     else()
         qt_add_executable(QTail
@@ -63,7 +87,7 @@ else()
     qt5_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
 endif()
 
-target_link_libraries(QTail PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Concurrent)
+target_link_libraries(QTail PRIVATE Qt${QT_VERSION_MAJOR}::Widgets QCoro::Core)
 
 set_target_properties(QTail PROPERTIES
     MACOSX_BUNDLE TRUE

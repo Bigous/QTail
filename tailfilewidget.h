@@ -2,10 +2,10 @@
 #define TAILFILEWIDGET_H
 
 #include <QDockWidget>
-#include <QTextEdit>
+#include <QListView>
 #include <QTableWidget>
 #include <QRegularExpression>
-#include "filemonitor.h"
+#include "LogFileModel.hpp"
 #include "highlighter.h"
 
 class TailFileWidget : public QDockWidget {
@@ -14,14 +14,10 @@ public:
     TailFileWidget(const QString& filePath, QWidget* parent = nullptr);
     void addHighlighter(Highlighter* highlighter);
 
-private slots:
-    void onNewLine(qint64 pos, const QString& line);
-    void onCursorPositionChanged(); // Novo slot para mudança de posição do cursor
-
 private:
-    QTextEdit* textEdit;
+    QListView* listView;
     QTableWidget* fixTable;
-    FileMonitor* fileMonitor;
+    LogFileModel* fileModel;
     QList<Highlighter*> highlighters;
     QRegularExpression fixRegex;
 
