@@ -1,23 +1,25 @@
 # QTail
 
-This is a home made tool for monitoring log files with some cool features.
+This is a homemade tool for monitoring log files with some cool features.
 
-## About License
+## License
 
-You may use it as you want to, but I, in no way, am not responsible for you usage, damage or anithing.
+You are free to use this tool as you wish, but I take no responsibility for how you use it, any damage caused, or any other issues that may arise.
 
-It's built in C++20 with [QT Community](https://www.qt.io/download-open-source) and [QCoro](https://qcoro.dvratil.cz/)
+This project is built with C++20 using [Qt Community](https://www.qt.io/download-open-source) and [QCoro](https://qcoro.dvratil.cz/).
 
-Any License, obligation in using it or whatever, read their sites.
+For any licensing details, terms of use, or obligations, please refer to their respective websites.
 
 ## Objective
 
-This tool aims to be blazing fast and consuming the minimum resources to:
+This tool aims to be blazing fast while consuming minimal resources to:
 
-- Load as fast as it can be the log file;
-- Continue monitoring the file and append new lines to the end of visualization;
-- Highlight control chars just like VSCode does;
-- Identify FIX protocol strings in the selected line of log and display a human readable table with tag names and field description when available. I'm using the [public FIX dictionary release by B3](https://www.b3.com.br/en_us/solutions/connectivity/fix-suite/) as the source of information. But you can exchange it by your own dictionary changing the `FIX44.xml` in de assets directory.
+- Load the log file as quickly as possible;
+- Continuously monitor the file and append new lines to the visualization;
+- Highlight control characters just like VSCode;
+- Identify FIX protocol strings in the selected log line and display a human-readable table with tag names and field descriptions when available.
+
+I'm using the [public FIX dictionary release by B3](https://www.b3.com.br/en_us/solutions/connectivity/fix-suite/) as the source of information, but you can replace it with your own dictionary by updating the `FIX44.xml` file in de assets directory.
 
 ## Wanna help?
 
