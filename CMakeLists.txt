@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(QTail VERSION 0.1 LANGUAGES CXX)
+project(QTail VERSION 0.5.0 LANGUAGES CXX)
 
 # Informações sobre o autor
 set(PROJECT_AUTHOR "Richard Natal")
