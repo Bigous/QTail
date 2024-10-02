@@ -54,7 +54,17 @@ public:
 
     // Implementação do método data() - conteúdo a ser exibido no QListView
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override {
-        if (!index.isValid() || index.row() >= m_lines.size() || role != Qt::DisplayRole)
+        if (!index.isValid() || index.row() >= m_lines.size())
+            return QVariant();
+
+        if (role == Qt::SizeHintRole) {
+            return (int)m_lines[index.row()].size();
+        }
+
+        if (role == Qt::UserRole)
+            return QVariant::fromValue(m_lines[index.row()]);
+
+        if (role != Qt::DisplayRole)
             return QVariant();
 
         QString displayText = QString::fromUtf8(m_lines[index.row()]);

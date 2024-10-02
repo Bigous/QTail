@@ -5,6 +5,9 @@
 #include <QListView>
 #include <QTableWidget>
 #include <QRegularExpression>
+#include <QCheckBox>
+#include <QPushButton>
+
 #include "LogFileModel.hpp"
 #include "FixDictionary.hpp"
 
@@ -13,7 +16,15 @@ class TailFileWidget : public QDockWidget {
 public:
     TailFileWidget(const QString& filePath, FixDictionary *fixDictionary , QWidget* parent = nullptr);
 
+public slots:
+    void applyFilter(const QString& filterText);
+    void clearFilter();
+
 private:
+    QWidget* logWidget;
+    QLineEdit* filterEdit;
+    QCheckBox* regexCheckBox;
+    QPushButton* toggleFilterButton;
     QListView* listView;
     QTableWidget* fixTable;
     LogFileModel* fileModel;

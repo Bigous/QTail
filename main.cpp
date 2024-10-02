@@ -6,6 +6,8 @@
 #include <QScreen>
 #include <QSplashScreen>
 
+Q_DECLARE_METATYPE(QByteArrayView)
+
 int main(int argc, char *argv[])
 {
 #ifndef NDEBUG
@@ -16,6 +18,8 @@ int main(int argc, char *argv[])
     qSetMessagePattern("%{time hh:mm:ss.zzz}|%{message}");
 #endif
     qInfo() << "Starting QTail...";
+
+    qRegisterMetaType<QByteArrayView>("QByteArrayView");
 
     QApplication a(argc, argv);
 
