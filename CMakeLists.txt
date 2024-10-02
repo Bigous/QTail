@@ -59,6 +59,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
             LogListView.hpp
             FixDictionary.hpp
             LogItemDelegate.hpp
+            FilterProxyModels.hpp
 
         )
     else()

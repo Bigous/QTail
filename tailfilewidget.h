@@ -10,6 +10,7 @@
 
 #include "LogFileModel.hpp"
 #include "FixDictionary.hpp"
+#include "FilterProxyModels.hpp"
 
 class TailFileWidget : public QDockWidget {
     Q_OBJECT
@@ -18,7 +19,6 @@ public:
 
 public slots:
     void applyFilter(const QString& filterText);
-    void clearFilter();
 
 private:
     QWidget* logWidget;
@@ -30,6 +30,8 @@ private:
     LogFileModel* fileModel;
     QRegularExpression fixRegex;
     FixDictionary* m_fixDictionary;
+    ContainsFilterProxyModel* containsProxyModel;
+    RegExFilterProxyModel* regexProxyModel;
 
     void processFixLine(const QString& line);
     void setupFixTable();

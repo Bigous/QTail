@@ -36,10 +36,18 @@ TailFileWidget::TailFileWidget(const QString& filePath, FixDictionary *fixDictio
         qDebug() << "Falha ao carregar a fonte personalizada.";
     }
 
+    // Cria os proxies de filtros do log
+    containsProxyModel = new ContainsFilterProxyModel(this);
+    regexProxyModel = new RegExFilterProxyModel(this);
+    containsProxyModel->setSourceModel(fileModel);
+    regexProxyModel->setSourceModel(fileModel);
+
+    listView->setModel(containsProxyModel);
+
     // Conecta a mudança de posição do cursor para verificar se a linha contém um registro FIX
     connect(listView->selectionModel(), &QItemSelectionModel::currentChanged, this, [this](const QModelIndex &current, const QModelIndex &previous) {
         if (current.isValid()) {
-            QString selectedLine = fileModel->data(current, Qt::DisplayRole).toString();
+            QString selectedLine = listView->model()->data(current, Qt::DisplayRole).toString();
             // Verifica se a linha corresponde ao padrão de registro FIX
             QRegularExpressionMatch match = fixRegex.match(selectedLine);
             if (match.hasMatch()) {
@@ -58,13 +66,19 @@ TailFileWidget::TailFileWidget(const QString& filePath, FixDictionary *fixDictio
     // Layout para o filtro
     QHBoxLayout* filterLayout = new QHBoxLayout;
 
+    bool fileTooLarge = fileModel->rowCount() > 500000;
+
     // Adicionar o QLineEdit para o filtro
     filterEdit = new QLineEdit(this);
-    filterEdit->setPlaceholderText(tr("Enter filter..."));
+    filterEdit->setPlaceholderText(fileTooLarge ? tr("Too large to filter...") : tr("Filter..."));
+    filterEdit->setEnabled(!fileTooLarge);
+
     filterLayout->addWidget(filterEdit);
 
     // Adicionar o checkbox para Regex
     regexCheckBox = new QCheckBox(tr("Use RegEx"), this);
+    regexCheckBox->setEnabled(!fileTooLarge);
+
     filterLayout->addWidget(regexCheckBox);
 
     QTimer* filterDebounce = new QTimer(this);
@@ -78,7 +92,13 @@ TailFileWidget::TailFileWidget(const QString& filePath, FixDictionary *fixDictio
     });
 
     connect(regexCheckBox, &QCheckBox::stateChanged, this, [this]() {
-        applyFilter(filterEdit->text());
+        if (regexCheckBox->isChecked()) {
+            regexProxyModel->setFilter(filterEdit->text());
+            listView->setModel(regexProxyModel);
+        } else {
+            containsProxyModel->setFilter(filterEdit->text());
+            listView->setModel(containsProxyModel);
+        }
     });
 
     // Adicionar o layout de filtro ao layout principal
@@ -96,50 +116,12 @@ TailFileWidget::TailFileWidget(const QString& filePath, FixDictionary *fixDictio
 }
 
 void TailFileWidget::applyFilter(const QString& filterText) {
-    QRegularExpression regex(filterText, QRegularExpression::CaseInsensitiveOption);
-    QByteArray search = filterText.toUtf8();
-    QByteArrayView searchView(search);
-    bool useRegex = regexCheckBox->isChecked();
-
-    // TODO: Usar QSortFilterProxyModel para filtrar o log.
-
-    // if (!useRegex) {
-    //     // Se não for regex, trate o filtro como uma expressão simples
-    //     regex = QRegularExpression(QRegularExpression::escape(filterText), QRegularExpression::CaseInsensitiveOption);
-    // }
-
-    // Aplique o filtro às linhas do modelo
-    listView->setUpdatesEnabled(false);
-    int rowCount = fileModel->rowCount();
-    for (int row = 0; row < rowCount; ++row) {
-        QModelIndex index = fileModel->index(row);
-        QByteArrayView line = fileModel->data(index, Qt::UserRole).value<QByteArrayView>();
-        //QString lineText = fileModel->data(index, Qt::UserRole).toString();
-        bool match = useRegex
-            ? regex.match(QString::fromUtf8(line)).hasMatch()
-            : line.contains(search);
-
-        listView->setRowHidden(row, !match);
-    }
-    listView->setUpdatesEnabled(true);
+    if(regexCheckBox->isChecked())
+        regexProxyModel->setFilter(filterText);
+    else
+        containsProxyModel->setFilter(filterText);
 }
 
-void TailFileWidget::clearFilter() {
-    // Desconecta temporariamente o sinal para evitar a chamada de applyFilter
-    disconnect(filterEdit, &QLineEdit::textChanged, this, &TailFileWidget::applyFilter);
-
-    filterEdit->clear(); // Limpa o campo de filtro sem disparar o sinal
-
-    // Exibe todas as linhas
-    listView->setUpdatesEnabled(false);
-    for (int row = 0; row < fileModel->rowCount(); ++row) {
-        listView->setRowHidden(row, false);
-    }
-    listView->setUpdatesEnabled(true);
-
-    // Reconecta o sinal para que futuras mudanças no QLineEdit disparem applyFilter
-    connect(filterEdit, &QLineEdit::textChanged, this, &TailFileWidget::applyFilter);
-}
 
 void TailFileWidget::processFixLine(const QString& line) {
     // Exemplo simples de processamento de uma linha do protocolo FIX
