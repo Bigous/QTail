@@ -27,9 +27,11 @@ public:
         setItemDelegate(m_delegate);
 
         // Ajustar o modo de redimensionamento
-        setUniformItemSizes(true);
+        //setUniformItemSizes(true);
         setFlow(QListView::TopToBottom);
         setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
+        setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
+        setWordWrap(false);
         setWrapping(false);
     }
 

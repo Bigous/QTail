@@ -24,9 +24,19 @@ public:
     // Sobrescrever o sizeHint para ajustar a altura de cada item
     QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override {
         QFontMetrics metrics(option.font);
-        qreal dpiScale = option.widget->devicePixelRatioF();  // Fator de escala do DPI
-        int height = metrics.height() * dpiScale;  // Altura ajustada pela escala
-        return QSize(option.rect.width(), height);  // Usar a altura ajustada
+        //qreal dpiScale = option.widget->devicePixelRatioF();  // Fator de escala do DPI
+
+        // Obtém o texto do item para calcular sua largura
+        QString itemText = index.data(Qt::DisplayRole).toString();
+
+        // Calcula a largura necessária com base no conteúdo do texto
+        int textWidth = metrics.horizontalAdvance(itemText);// * dpiScale;
+
+        // Calcula a altura com base no DPI
+        int height = metrics.height();// * dpiScale;
+
+        // Retorna a largura baseada no conteúdo e a altura ajustada
+        return QSize(textWidth, height);
     }
 
     void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override {
