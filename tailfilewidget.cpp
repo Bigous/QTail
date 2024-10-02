@@ -4,6 +4,7 @@
 #include <QFontDatabase>
 #include <QScrollBar>
 #include <QLineEdit>
+#include <QSplitter>
 
 #include "LogListView.hpp"
 
@@ -92,13 +93,13 @@ void TailFileWidget::setupFixTable() {
     addFilterRow();
 
     // Layout para colocar o QTextEdit e o QTableWidget lado a lado
-    QWidget* container = new QWidget(this);
-    QHBoxLayout* layout = new QHBoxLayout(container);
-    layout->addWidget(listView);
-    layout->addWidget(fixTable);
-    container->setLayout(layout);
+    QSplitter* splitter = new QSplitter(this);
+    splitter->setOrientation(Qt::Horizontal);
 
-    setWidget(container);
+    splitter->addWidget(listView);
+    splitter->addWidget(fixTable);
+
+    setWidget(splitter);
 }
 
 void TailFileWidget::addFilterRow() {
