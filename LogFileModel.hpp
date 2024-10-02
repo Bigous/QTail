@@ -54,7 +54,17 @@ public:
 
     // Implementação do método data() - conteúdo a ser exibido no QListView
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override {
-        if (!index.isValid() || index.row() >= m_lines.size() || role != Qt::DisplayRole)
+        if (!index.isValid() || index.row() >= m_lines.size())
+            return QVariant();
+
+        if (role == Qt::SizeHintRole) {
+            return m_maxLineSize;
+        }
+
+        if (role == Qt::UserRole)
+            return QVariant::fromValue(m_lines[index.row()]);
+
+        if (role != Qt::DisplayRole)
             return QVariant();
 
         QString displayText = QString::fromUtf8(m_lines[index.row()]);
@@ -77,6 +87,10 @@ public:
         //return QByteArray(m_lines[index.row()].data(), m_lines[index.row()].size());
     }
 
+    int getMaxLineSize() const {
+        return m_maxLineSize;
+    }
+
 signals:
     // Sinal para notificar que novas linhas foram adicionadas
     void onBeforeLinesAppended();
@@ -93,6 +107,7 @@ private:
     bool m_lastLineWasIncomplete = false;
     bool m_stopRequested = false;
     QRegularExpression m_controlChars;
+    int m_maxLineSize = 0;
 
     void processBuffer(QByteArray& buffer)
     {
@@ -106,13 +121,22 @@ private:
         const auto bufferSize = buffer.size();
         for(; i < bufferSize; ++i) {
             if(buffer[i] == '\n') {
-                if(i > 1 || !m_lastLineWasIncomplete)
-                    m_lines.emplace_back(buffer.data() + startPos, i - startPos);
+                if(i > 1 || !m_lastLineWasIncomplete) {
+                    int lineSize = i - startPos;
+                    m_lines.emplace_back(buffer.data() + startPos, lineSize);
+                    if (lineSize > m_maxLineSize) {
+                        m_maxLineSize = lineSize;
+                    }
+                }
                 startPos = i + 1;
             }
         }
         if(startPos < i) {
+            int lineSize = i - startPos;
             m_lines.emplace_back(buffer.data() + startPos, i - startPos);
+            if (lineSize > m_maxLineSize) {
+                m_maxLineSize = lineSize;
+            }
         }
         m_lastLineWasIncomplete = buffer.back() != '\n';
         emit onLinesAppended();

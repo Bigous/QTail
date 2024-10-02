@@ -30,6 +30,8 @@ public:
         setUniformItemSizes(true);
         setFlow(QListView::TopToBottom);
         setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
+        setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
+        setWordWrap(false);
         setWrapping(false);
     }
 

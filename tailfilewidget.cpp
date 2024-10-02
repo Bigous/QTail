@@ -1,9 +1,13 @@
 #include "tailfilewidget.h"
 #include <QVBoxLayout>
+#include <QHBoxLayout>
 #include <QHeaderView>
 #include <QFontDatabase>
 #include <QScrollBar>
 #include <QLineEdit>
+#include <QSplitter>
+#include <QTimer>
+#include <QApplication>
 
 #include "LogListView.hpp"
 
@@ -32,10 +36,18 @@ TailFileWidget::TailFileWidget(const QString& filePath, FixDictionary *fixDictio
         qDebug() << "Falha ao carregar a fonte personalizada.";
     }
 
+    // Cria os proxies de filtros do log
+    containsProxyModel = new ContainsFilterProxyModel(this);
+    regexProxyModel = new RegExFilterProxyModel(this);
+    containsProxyModel->setSourceModel(fileModel);
+    regexProxyModel->setSourceModel(fileModel);
+
+    listView->setModel(containsProxyModel);
+
     // Conecta a mudança de posição do cursor para verificar se a linha contém um registro FIX
     connect(listView->selectionModel(), &QItemSelectionModel::currentChanged, this, [this](const QModelIndex &current, const QModelIndex &previous) {
         if (current.isValid()) {
-            QString selectedLine = fileModel->data(current, Qt::DisplayRole).toString();
+            QString selectedLine = listView->model()->data(current, Qt::DisplayRole).toString();
             // Verifica se a linha corresponde ao padrão de registro FIX
             QRegularExpressionMatch match = fixRegex.match(selectedLine);
             if (match.hasMatch()) {
@@ -48,10 +60,68 @@ TailFileWidget::TailFileWidget(const QString& filePath, FixDictionary *fixDictio
         }
     });
 
+    // Layout principal para o ListView e o campo de filtro
+    QVBoxLayout* mainLayout = new QVBoxLayout;
+
+    // Layout para o filtro
+    QHBoxLayout* filterLayout = new QHBoxLayout;
+
+    bool fileTooLarge = fileModel->rowCount() > 500000;
+
+    // Adicionar o QLineEdit para o filtro
+    filterEdit = new QLineEdit(this);
+    filterEdit->setPlaceholderText(fileTooLarge ? tr("Too large to filter...") : tr("Filter..."));
+    filterEdit->setEnabled(!fileTooLarge);
+
+    filterLayout->addWidget(filterEdit);
+
+    // Adicionar o checkbox para Regex
+    regexCheckBox = new QCheckBox(tr("Use RegEx"), this);
+    regexCheckBox->setEnabled(!fileTooLarge);
+
+    filterLayout->addWidget(regexCheckBox);
+
+    QTimer* filterDebounce = new QTimer(this);
+    filterDebounce->setSingleShot(true);
+
+    connect(filterEdit, &QLineEdit::textChanged, this, [this, filterDebounce]() {
+        filterDebounce->start(300);
+    });
+    connect(filterDebounce, &QTimer::timeout, this, [this]() {
+        applyFilter(filterEdit->text());
+    });
+
+    connect(regexCheckBox, &QCheckBox::stateChanged, this, [this]() {
+        if (regexCheckBox->isChecked()) {
+            regexProxyModel->setFilter(filterEdit->text());
+            listView->setModel(regexProxyModel);
+        } else {
+            containsProxyModel->setFilter(filterEdit->text());
+            listView->setModel(containsProxyModel);
+        }
+    });
+
+    // Adicionar o layout de filtro ao layout principal
+    mainLayout->addLayout(filterLayout);
+
+    // Adicionar o ListView ao layout principal
+    mainLayout->addWidget(listView);
+
+    logWidget = new QWidget(this);
+    logWidget->setLayout(mainLayout);
+
     // Setup da tabela de FIX, inicialmente escondida
     setupFixTable();
     fixTable->setVisible(false);
 }
+
+void TailFileWidget::applyFilter(const QString& filterText) {
+    if(regexCheckBox->isChecked())
+        regexProxyModel->setFilter(filterText);
+    else
+        containsProxyModel->setFilter(filterText);
+}
+
 
 void TailFileWidget::processFixLine(const QString& line) {
     // Exemplo simples de processamento de uma linha do protocolo FIX
@@ -81,8 +151,8 @@ void TailFileWidget::processFixLine(const QString& line) {
 
 void TailFileWidget::setupFixTable() {
     fixTable->setColumnCount(4);
-    fixTable->setHorizontalHeaderLabels({"Tag", "Value", "Tag Name", "Domain Description"});
-    fixTable->horizontalHeader()->setMinimumSectionSize(50);
+    fixTable->setHorizontalHeaderLabels({tr("Tag"), tr("Value"), tr("Tag Name"), tr("Domain Description")});
+    fixTable->horizontalHeader()->setMinimumSectionSize(5);
     fixTable->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
     fixTable->setSelectionMode(QAbstractItemView::NoSelection);
     fixTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -92,13 +162,13 @@ void TailFileWidget::setupFixTable() {
     addFilterRow();
 
     // Layout para colocar o QTextEdit e o QTableWidget lado a lado
-    QWidget* container = new QWidget(this);
-    QHBoxLayout* layout = new QHBoxLayout(container);
-    layout->addWidget(listView);
-    layout->addWidget(fixTable);
-    container->setLayout(layout);
+    QSplitter* splitter = new QSplitter(this);
+    splitter->setOrientation(Qt::Horizontal);
 
-    setWidget(container);
+    splitter->addWidget(logWidget);
+    splitter->addWidget(fixTable);
+
+    setWidget(splitter);
 }
 
 void TailFileWidget::addFilterRow() {
@@ -107,7 +177,7 @@ void TailFileWidget::addFilterRow() {
 
     for (int col = 0; col < columnCount; ++col) {
         QLineEdit* filterEdit = new QLineEdit(this);
-        filterEdit->setPlaceholderText("Filter...");
+        filterEdit->setPlaceholderText(tr("Filter..."));
         connect(filterEdit, &QLineEdit::textChanged, this, [this, col](const QString& text) {
             filterTable(col, text); // Função de filtro para aplicar na coluna
         });
