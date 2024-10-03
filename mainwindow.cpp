@@ -1,6 +1,8 @@
 #include <QTextEdit>
 #include <QDockWidget>
 #include <QFileDialog>
+#include <QStackedWidget>
+#include <qforeach.h>
 
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
@@ -27,27 +29,17 @@ void MainWindow::openFile() {
     QString filePath = QFileDialog::getOpenFileName(this, tr("Open File"), "", tr("All Files (*)"));
 
     if (!filePath.isEmpty()) {
-        // Extrair o nome do arquivo usando QFileInfo
-        QFileInfo fileInfo(filePath);
-        QString fileName = fileInfo.fileName();  // Apenas o nome do arquivo
-
         // Criar uma nova TailFileWidget com o arquivo selecionado
         TailFileWidget* tailFileWidget = new TailFileWidget(filePath, &m_fixDictionary, this);
-        tailFileWidget->setAllowedAreas(Qt::AllDockWidgetAreas);
-
-        tailFileWidget->setWindowTitle(tr("%1").arg(filePath));
-        tailFileWidget->setWindowIconText(fileName);
-
-        // Definir para deletar o widget ao fechar a janela
-        tailFileWidget->setAttribute(Qt::WA_DeleteOnClose);
+        //tailFileWidget->setWindowTitle(fileName);
 
         // Se não houver widgets dockados, docka ele à esquerda. Caso contrário, tabifica junto com o primeiro widget dockado
-        if (!findFirstDockWidget()) {
+        auto firstDocked = findFirstDockWidget();
+        if (firstDocked == nullptr) {
             addDockWidget(Qt::LeftDockWidgetArea, tailFileWidget);
         } else {
-            tabifyDockWidget(findFirstDockWidget(), tailFileWidget);
+            addTabToDock(firstDocked, tailFileWidget);
         }
-        tailFileWidget->raise(); // Deixar o novo dock em foco
     }
 }
 
@@ -56,11 +48,25 @@ void MainWindow::onDockWidgetToggled(QDockWidget* dockWidget) {
         // Quando o widget for dockado, transformá-lo em uma aba
         QDockWidget* firstDockWidget = findFirstDockWidget();
         if (firstDockWidget && firstDockWidget != dockWidget) {
-            tabifyDockWidget(firstDockWidget, dockWidget);
-            dockWidget->raise(); // Deixar a aba dockada na frente
+            addTabToDock(firstDockWidget, dockWidget);
         }
     }
 }
+
+void MainWindow::addTabToDock(QDockWidget* first, QDockWidget* second)
+{
+    TailFileWidget *lfw = qobject_cast<TailFileWidget*>(first);
+
+    // Precisamos chamar checkScrollPositionBeforeInsert e scrollToBottomIfNeeded pois a criação da tab diminui o espaço vertical do ListView
+    // e isso desloca a última linha para fora da área visível, o que não é desejável para um monitor de log.
+    if(lfw) lfw->checkScrollPositionBeforeInsert();
+
+    tabifyDockWidget(first, second);
+    QMetaObject::invokeMethod(second, "raise", Qt::QueuedConnection); // activate the tab
+
+    if(lfw) lfw->scrollToBottomIfNeeded();
+}
+
 
 QDockWidget* MainWindow::findFirstDockWidget() {
     // Acha o primeiro QDockWidget existente para tabificação

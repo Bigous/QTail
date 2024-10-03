@@ -60,6 +60,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
             FixDictionary.hpp
             LogItemDelegate.hpp
             FilterProxyModels.hpp
+            TailFileTitleBar.hpp
 
         )
     else()

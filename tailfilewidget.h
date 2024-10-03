@@ -9,6 +9,7 @@
 #include <QPushButton>
 
 #include "LogFileModel.hpp"
+#include "LogListView.hpp"
 #include "FixDictionary.hpp"
 #include "FilterProxyModels.hpp"
 
@@ -19,13 +20,15 @@ public:
 
 public slots:
     void applyFilter(const QString& filterText);
+    void checkScrollPositionBeforeInsert() {listView->checkScrollPositionBeforeInsert();}
+    void scrollToBottomIfNeeded() {listView->scrollToBottomIfNeeded();}
 
 private:
     QWidget* logWidget;
     QLineEdit* filterEdit;
     QCheckBox* regexCheckBox;
     QPushButton* toggleFilterButton;
-    QListView* listView;
+    LogListView* listView;
     QTableWidget* fixTable;
     LogFileModel* fileModel;
     QRegularExpression fixRegex;

@@ -10,9 +10,19 @@
 #include <QApplication>
 
 #include "LogListView.hpp"
+#include "TailFileTitleBar.hpp"
 
 TailFileWidget::TailFileWidget(const QString& filePath, FixDictionary *fixDictionary, QWidget* parent)
     : QDockWidget(parent), fixRegex(QRegularExpression("8=FIX.*\u2401")) {
+
+    setAllowedAreas(Qt::AllDockWidgetAreas);
+    setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetClosable);
+    QFileInfo fileInfo(filePath);
+    setWindowTitle(fileInfo.fileName());
+    setTitleBarWidget(new TailFileTitleBar(this, filePath, fileInfo.fileName(), this));
+
+    // Definir para deletar o widget ao fechar a janela
+    setAttribute(Qt::WA_DeleteOnClose);
 
     m_fixDictionary = fixDictionary;
 

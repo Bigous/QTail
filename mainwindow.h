@@ -24,6 +24,7 @@ public:
 
 protected:
     void onDockWidgetToggled(QDockWidget* dockWidget);
+    void addTabToDock(QDockWidget* fisrt, QDockWidget* second);
 
     QDockWidget* findFirstDockWidget();
 

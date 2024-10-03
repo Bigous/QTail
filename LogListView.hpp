@@ -35,7 +35,7 @@ public:
         setWrapping(false);
     }
 
-private slots:
+public slots:
     // Verificar se o usuário está no final da lista antes de adicionar novas linhas
     void checkScrollPositionBeforeInsert() {
         QScrollBar *scrollBar = verticalScrollBar();
