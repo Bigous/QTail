@@ -144,10 +144,10 @@ TailFileWidget::TailFileWidget(const QString& filePath, FixDictionary *fixDictio
 void TailFileWidget::applyFilter(const QString& filterText) {
     if(regexCheckBox->isChecked()) {
         regexProxyModel->setFilter(filterText);
-        m_highlightRules[1].regex.setPattern(filterText);
+        m_highlightRules[0].regex.setPattern(filterText);
     } else {
         containsProxyModel->setFilter(filterText);
-        m_highlightRules[1].regex.setPattern(QRegularExpression::escape(filterText));
+        m_highlightRules[0].regex.setPattern(QRegularExpression::escape(filterText));
     }
     QMetaObject::invokeMethod(listView, "repaint", Qt::QueuedConnection);
 }
