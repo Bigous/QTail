@@ -1,8 +1,8 @@
 #include <windows.h>
 
 VS_VERSION_INFO VERSIONINFO
-    FILEVERSION 0,5,0,0
-    PRODUCTVERSION 0,5,0,0
+    FILEVERSION 0,6,0,0
+    PRODUCTVERSION 0,6,0,0
     FILEFLAGSMASK VS_FFI_FILEFLAGSMASK
         FILEFLAGS 0x0L
     FILEOS VOS__WINDOWS32
@@ -16,7 +16,7 @@ VS_VERSION_INFO VERSIONINFO
     VALUE "FileDescription", "QTail - The QT Log monitoring tool\0"
     VALUE "FileVersion", "0.1\0"
     VALUE "ProductName", "QTail\0"
-    VALUE "ProductVersion", "0.5\0"
+    VALUE "ProductVersion", "0.6\0"
     VALUE "OriginalFilename", "QTail.exe\0"
     END
         END
