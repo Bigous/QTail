@@ -12,6 +12,7 @@
 #include "LogListView.hpp"
 #include "FixDictionary.hpp"
 #include "FilterProxyModels.hpp"
+#include "HighlightRule.hpp"
 
 class TailFileWidget : public QDockWidget {
     Q_OBJECT
@@ -35,6 +36,7 @@ private:
     FixDictionary* m_fixDictionary;
     ContainsFilterProxyModel* containsProxyModel;
     RegExFilterProxyModel* regexProxyModel;
+    QList<HighlightRule> m_highlightRules;
 
     void processFixLine(const QString& line);
     void setupFixTable();

@@ -12,7 +12,7 @@ class LogListView : public QListView {
     Q_OBJECT
 
 public:
-    explicit LogListView(LogFileModel* model, QWidget *parent = nullptr)
+    explicit LogListView(LogFileModel* model, QList<HighlightRule> *highlightRules, QWidget *parent = nullptr)
         : QListView(parent), userAtEnd(true) {
         setModel(model);
         connect(model, &LogFileModel::onBeforeLinesAppended, this, &LogListView::checkScrollPositionBeforeInsert);
@@ -20,9 +20,7 @@ public:
 
         model->Start();
 
-        m_delegate = new LogItemDelegate(this);
-
-        m_delegate->addHighlightRule(QRegularExpression("[\u2400-\u240F]"), true, QColor::fromRgbF(1, 0, 0, 0.5));
+        m_delegate = new LogItemDelegate(highlightRules, this);
 
         setItemDelegate(m_delegate);
 

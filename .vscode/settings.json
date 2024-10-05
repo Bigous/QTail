@@ -1,3 +1,19 @@
 {
-  "cmake.options.statusBarVisibility": "visible"
+  "cmake.options.statusBarVisibility": "visible",
+  "cmake.configureSettings": {
+    "CMAKE_PREFIX_PATH": "R:/Richard/tools/Qt/6.7.2/msvc2019_64", // Atualize com o caminho correto do seu Qt
+    "CMAKE_TOOLCHAIN_FILE": "R:/Richard/src/lib/vcpkg/scripts/buildsystems/vcpkg.cmake"
+  },
+  "cmake.generator": "Ninja",
+  "cmake.buildDirectory": "${workspaceFolder}/build",
+  "cmake.sourceDirectory": "${workspaceFolder}",
+  "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+  "files.associations": {
+    "*.cpp": "cpp",
+    "*.h": "cpp",
+    "*.ui": "xml",
+    "CMakeLists.txt": "cmake"
+  },
+  "cmake.configureOnOpen": true,
+  "cmake.cmakePath": "R:\\Richard\\tools\\Qt\\Tools\\CMake_64\\bin\\cmake.exe"
 }
