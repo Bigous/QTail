@@ -6,19 +6,13 @@
 #include <QPainter>
 #include <QRegularExpression>
 
+#include "HighlightRule.hpp"
+
 // Delegate personalizado para ajustar a altura das linhas
 class LogItemDelegate : public QStyledItemDelegate {
 public:
-    explicit LogItemDelegate(QObject *parent = nullptr)
-        : QStyledItemDelegate(parent), m_selectionColor(0, 96, 192) {}
-
-    void addHighlightRule(const QRegularExpression &regex,
-                          bool useBackgroundColor = true,
-                          const QColor &backgroundColor = Qt::yellow,
-                          bool useForegroundColor = false,
-                          const QColor &foregroundColor = Qt::black
-                          ) {
-        m_highlightRules.push_front({regex, useForegroundColor, foregroundColor, useBackgroundColor, backgroundColor});
+    explicit LogItemDelegate(QList<HighlightRule> *highlightRules, QObject *parent = nullptr)
+        : QStyledItemDelegate(parent), m_selectionColor(0, 96, 192), m_highlightRules(highlightRules) {
     }
 
     // Sobrescrever o sizeHint para ajustar a altura de cada item
@@ -47,7 +41,7 @@ public:
             painter->fillRect(option.rect, m_selectionColor);  // Cor azul para seleção
         }
 
-        if (m_highlightRules.isEmpty()) {
+        if (m_highlightRules->isEmpty()) {
             // Se não houver regras de highlight, desenhar o texto normalmente
             QStyledItemDelegate::paint(painter, opt, index);
             return;
@@ -68,7 +62,8 @@ public:
         painter->drawText(lineRect, Qt::AlignLeft | Qt::AlignVCenter, displayText);
 
         // Iterar sobre as regras de highlight
-        for (const auto &rule : m_highlightRules) {
+        for(auto size = m_highlightRules->size() -1; size >= 0; --size) {
+            const auto &rule = m_highlightRules->at(size);
             QRegularExpressionMatchIterator it = rule.regex.globalMatch(displayText);
             while (it.hasNext()) {
                 QRegularExpressionMatch match = it.next();
@@ -95,16 +90,9 @@ public:
         painter->restore();
     }
 private:
-    struct HighlightRule {
-        QRegularExpression regex;   // Expressão regular para correspondência
-        bool useForegroundColor;
-        QColor foregroundColor;     // Cor do texto
-        bool useBackgroundColor;
-        QColor backgroundColor;     // Cor do fundo
-    };
 
     QColor m_selectionColor;
-    QList<HighlightRule> m_highlightRules;
+    QList<HighlightRule> *m_highlightRules;
 };
 
 

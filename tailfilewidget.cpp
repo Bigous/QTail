@@ -11,6 +11,7 @@
 
 #include "LogListView.hpp"
 #include "TailFileTitleBar.hpp"
+#include "HighlightRuleManager.hpp"
 
 TailFileWidget::TailFileWidget(const QString& filePath, FixDictionary *fixDictionary, QWidget* parent)
     : QDockWidget(parent), fixRegex(QRegularExpression("8=FIX.*\u2401")) {
@@ -24,10 +25,16 @@ TailFileWidget::TailFileWidget(const QString& filePath, FixDictionary *fixDictio
     // Definir para deletar o widget ao fechar a janela
     setAttribute(Qt::WA_DeleteOnClose);
 
+    // Default Highlights
+    // filter
+    m_highlightRules.push_back({QRegularExpression(""), true, Qt::white, true, QColor::fromRgbF(0, 0.5, 0)});
+    // control chars
+    m_highlightRules.push_back({QRegularExpression("[\u2400-\u240F]"), true, Qt::white, true, QColor::fromRgbF(0.5, 0, 0)});
+
     m_fixDictionary = fixDictionary;
 
     fileModel = new LogFileModel(filePath, this);
-    listView = new LogListView(fileModel, this);
+    listView = new LogListView(fileModel, &m_highlightRules, this);
     fixTable = new QTableWidget(this);
 
     // Carregar a fonte personalizada
@@ -91,6 +98,15 @@ TailFileWidget::TailFileWidget(const QString& filePath, FixDictionary *fixDictio
 
     filterLayout->addWidget(regexCheckBox);
 
+    QPushButton* highlights = new QPushButton(tr("Highlights"), this);
+
+    filterLayout->addWidget(highlights);
+
+    connect(highlights, &QPushButton::clicked, this, [this, fileInfo]() {
+        HighlightRuleManager highlightRuleManager(&m_highlightRules, fileInfo.fileName(), nullptr);
+        highlightRuleManager.exec();
+    });
+
     QTimer* filterDebounce = new QTimer(this);
     filterDebounce->setSingleShot(true);
 
@@ -126,10 +142,14 @@ TailFileWidget::TailFileWidget(const QString& filePath, FixDictionary *fixDictio
 }
 
 void TailFileWidget::applyFilter(const QString& filterText) {
-    if(regexCheckBox->isChecked())
+    if(regexCheckBox->isChecked()) {
         regexProxyModel->setFilter(filterText);
-    else
+        m_highlightRules[1].regex.setPattern(filterText);
+    } else {
         containsProxyModel->setFilter(filterText);
+        m_highlightRules[1].regex.setPattern(QRegularExpression::escape(filterText));
+    }
+    QMetaObject::invokeMethod(listView, "repaint", Qt::QueuedConnection);
 }
 
 

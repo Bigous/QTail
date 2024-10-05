@@ -61,6 +61,12 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
             LogItemDelegate.hpp
             FilterProxyModels.hpp
             TailFileTitleBar.hpp
+            HighlightRule.hpp
+            HighlightRuleForm.hpp
+            HighlightRuleManager.hpp
+
+
+
 
         )
     else()
