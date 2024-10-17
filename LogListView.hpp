@@ -31,6 +31,9 @@ public:
         setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
         setWordWrap(false);
         setWrapping(false);
+        setAttribute(Qt::WA_OpaquePaintEvent);
+        setAttribute(Qt::WA_PaintOnScreen);
+        setAttribute(Qt::WA_StaticContents);
     }
 
 public slots:

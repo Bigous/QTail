@@ -27,9 +27,10 @@ TailFileWidget::TailFileWidget(const QString& filePath, FixDictionary *fixDictio
 
     // Default Highlights
     // filter
-    m_highlightRules.push_back({QRegularExpression(""), true, Qt::white, true, QColor::fromRgbF(0, 0.5, 0)});
+    m_highlightRules.push_back({QRegularExpression(""), true, Qt::white, true, Qt::darkGreen});
     // control chars
-    m_highlightRules.push_back({QRegularExpression("[\u2400-\u240F]"), true, Qt::white, true, QColor::fromRgbF(0.5, 0, 0)});
+    m_highlightRules.push_back({QRegularExpression("[\u2400-\u240F]"), true, Qt::white, true, Qt::darkRed});
+    m_highlightRules[1].regex.optimize();
 
     m_fixDictionary = fixDictionary;
 
@@ -145,9 +146,11 @@ void TailFileWidget::applyFilter(const QString& filterText) {
     if(regexCheckBox->isChecked()) {
         regexProxyModel->setFilter(filterText);
         m_highlightRules[0].regex.setPattern(filterText);
+        m_highlightRules[0].regex.optimize();
     } else {
         containsProxyModel->setFilter(filterText);
         m_highlightRules[0].regex.setPattern(QRegularExpression::escape(filterText));
+        m_highlightRules[0].regex.optimize();
     }
     QMetaObject::invokeMethod(listView, "repaint", Qt::QueuedConnection);
 }

@@ -47,7 +47,7 @@ public:
             return;
         }
 
-        QString displayText = opt.text;
+        const QString &displayText = opt.text;
 
         painter->save();  // Salvar o estado atual do QPainter
 
@@ -61,10 +61,16 @@ public:
 
         painter->drawText(lineRect, Qt::AlignLeft | Qt::AlignVCenter, displayText);
 
+
         // Iterar sobre as regras de highlight
         for(auto size = m_highlightRules->size() -1; size >= 0; --size) {
             const auto &rule = m_highlightRules->at(size);
             QRegularExpressionMatchIterator it = rule.regex.globalMatch(displayText);
+            if(it.hasNext()) {
+                // Desenhar o texto da correspondência
+                if(rule.useForegroundColor)
+                    painter->setPen(rule.foregroundColor);
+            }
             while (it.hasNext()) {
                 QRegularExpressionMatch match = it.next();
                 int start = match.capturedStart();
@@ -75,12 +81,9 @@ public:
                                 metrics.horizontalAdvance(matchedText), opt.rect.height());
 
                 // Desenhar o fundo da correspondência
-                if(rule.useBackgroundColor)
+                if(rule.useBackgroundColor) {
                     painter->fillRect(matchRect, rule.backgroundColor);
-
-                // Desenhar o texto da correspondência
-                if(rule.useForegroundColor)
-                    painter->setPen(rule.foregroundColor);
+                }
 
                 painter->drawText(matchRect, Qt::AlignLeft | Qt::AlignVCenter, matchedText);
             }
