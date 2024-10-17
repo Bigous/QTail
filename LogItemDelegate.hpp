@@ -19,6 +19,7 @@ public:
         m_hoverColor = QApplication::palette().color(QPalette::Window).lightness() < 128
                            ? m_hoverColor = QColor(100, 100, 100) // Tema escuro - cor mais clara para hover
                            : QColor(220, 220, 220); // Tema claro - cor mais escura para hover
+        m_emojiFont.setFamily("Noto Emoji"); // Fonte que contém emojis para caracteres de controle
     }
 
     // Sobrescrever o sizeHint para ajustar a altura de cada item
@@ -51,13 +52,6 @@ public:
             painter->fillRect(opt.rect, m_hoverColor);  // Cor para hover
         }
 
-        if (m_highlightRules->isEmpty()) {
-            // Se não houver regras de highlight, desenhar o texto normalmente
-            QStyledItemDelegate::paint(painter, opt, index);
-            painter->restore();
-            return;
-        }
-
         const QString &displayText = opt.text;
 
         QFontMetrics metrics(opt.font);
@@ -68,21 +62,36 @@ public:
         QVector<QTextLayout::FormatRange> formats;
 
         // Iterar sobre as regras de highlight na ordem inversa e aplicar os destaques
-        for (auto it = m_highlightRules->rbegin(); it != m_highlightRules->rend(); ++it) {
-            const auto &rule = *it;
-            QRegularExpressionMatchIterator matchIterator = rule.regex.globalMatch(displayText);
-            while (matchIterator.hasNext()) {
-                QRegularExpressionMatch match = matchIterator.next();
-                QTextLayout::FormatRange formatRange;
-                formatRange.start = match.capturedStart();
-                formatRange.length = match.capturedLength();
-                if (rule.useForegroundColor) {
-                    formatRange.format.setForeground(rule.foregroundColor);
+        if(m_highlightRules != nullptr) {
+            for (auto it = m_highlightRules->rbegin(); it != m_highlightRules->rend(); ++it) {
+                const auto &rule = *it;
+                QRegularExpressionMatchIterator matchIterator = rule.regex.globalMatch(displayText);
+                while (matchIterator.hasNext()) {
+                    QRegularExpressionMatch match = matchIterator.next();
+                    QTextLayout::FormatRange formatRange;
+                    formatRange.start = match.capturedStart();
+                    formatRange.length = match.capturedLength();
+                    if (rule.useForegroundColor) {
+                        formatRange.format.setForeground(rule.foregroundColor);
+                    }
+                    if (rule.useBackgroundColor) {
+                        formatRange.format.setBackground(rule.backgroundColor);
+                    }
+                    formats.append(formatRange);
                 }
-                if (rule.useBackgroundColor) {
-                    formatRange.format.setBackground(rule.backgroundColor);
-                }
-                formats.append(formatRange);
+            }
+        }
+
+        // Iterar sobre cada caractere do texto e substituir caracteres de controle por emojis
+        for (int i = 0; i < displayText.length(); ++i) {
+            QChar currentChar = displayText[i];
+            if (currentChar.unicode() >= 0x00 && currentChar.unicode() <= 0x1F) { // Caracteres de controle
+                QTextLayout::FormatRange ctrlCharFormat;
+                ctrlCharFormat.start = i;
+                ctrlCharFormat.length = 1;
+                ctrlCharFormat.format.setForeground(Qt::white);
+                ctrlCharFormat.format.setBackground(Qt::darkRed);
+                formats.append(ctrlCharFormat);
             }
         }
 
@@ -98,7 +107,6 @@ public:
         // Desenhar o layout do texto na posição correta
         painter->translate(opt.rect.topLeft());
         textLayout.draw(painter, QPointF(0, (opt.rect.height() - metrics.height()) / 2));
-        painter->translate(-opt.rect.topLeft());
 
         painter->restore();  // Restaurar o estado do QPainter
     }
@@ -107,6 +115,7 @@ private:
     QColor m_selectionColor;
     QColor m_hoverColor;
     QList<HighlightRule> *m_highlightRules;
+    QFont m_emojiFont;
 };
 
 #endif // LOGITEMDELEGATE_HPP
