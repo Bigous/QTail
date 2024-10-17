@@ -158,10 +158,14 @@ private:
             co_return;
         }
 
+        qDebug() << "Start reading file " << m_fileName;
+
         // Carga inicial de todas as linhas já existentes no arquivo
         m_buffers.emplace_back(m_file.readAll());
 
         processBuffer(m_buffers.back());
+
+        qDebug() << "End reading file " << m_fileName;
 
         QCoro::detail::QCoroIODevice coroDevice{&m_file};
 
