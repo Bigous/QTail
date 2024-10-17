@@ -5,6 +5,9 @@
 #include <QFontMetrics>
 #include <QPainter>
 #include <QRegularExpression>
+#include <QTextLayout>
+#include <QApplication>
+#include <QPalette>
 
 #include "HighlightRule.hpp"
 
@@ -13,6 +16,9 @@ class LogItemDelegate : public QStyledItemDelegate {
 public:
     explicit LogItemDelegate(QList<HighlightRule> *highlightRules, QObject *parent = nullptr)
         : QStyledItemDelegate(parent), m_selectionColor(0, 96, 192), m_highlightRules(highlightRules) {
+        m_hoverColor = QApplication::palette().color(QPalette::Window).lightness() < 128
+                           ? m_hoverColor = QColor(100, 100, 100) // Tema escuro - cor mais clara para hover
+                           : QColor(220, 220, 220); // Tema claro - cor mais escura para hover
     }
 
     // Sobrescrever o sizeHint para ajustar a altura de cada item
@@ -36,67 +42,71 @@ public:
         QStyleOptionViewItem opt = option;
         initStyleOption(&opt, index);
 
+        painter->save();  // Salvar o estado atual do QPainter
+
         // Verificar se o item está selecionado e ajustar o fundo
-        if (option.state & QStyle::State_Selected) {
-            painter->fillRect(option.rect, m_selectionColor);  // Cor azul para seleção
+        if (opt.state & QStyle::State_Selected) {
+            painter->fillRect(opt.rect, m_selectionColor);  // Cor azul para seleção
+        } else if (opt.state & QStyle::State_MouseOver) {
+            painter->fillRect(opt.rect, m_hoverColor);  // Cor para hover
         }
 
         if (m_highlightRules->isEmpty()) {
             // Se não houver regras de highlight, desenhar o texto normalmente
             QStyledItemDelegate::paint(painter, opt, index);
+            painter->restore();
             return;
         }
 
         const QString &displayText = opt.text;
 
-        painter->save();  // Salvar o estado atual do QPainter
-
         QFontMetrics metrics(opt.font);
 
-        // Posição inicial de x
-        int x = opt.rect.x() + opt.widget->style()->pixelMetric(QStyle::PM_FocusFrameHMargin, &opt, opt.widget);
+        // Criar um QTextLayout para renderizar o texto com múltiplos formatos
+        QTextLayout textLayout(displayText, opt.font);
+        textLayout.setTextOption(QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
+        QVector<QTextLayout::FormatRange> formats;
 
-        QRect lineRect(x, opt.rect.y(),
-                       metrics.horizontalAdvance(displayText), opt.rect.height());
-
-        painter->drawText(lineRect, Qt::AlignLeft | Qt::AlignVCenter, displayText);
-
-
-        // Iterar sobre as regras de highlight
-        for(auto size = m_highlightRules->size() -1; size >= 0; --size) {
-            const auto &rule = m_highlightRules->at(size);
-            QRegularExpressionMatchIterator it = rule.regex.globalMatch(displayText);
-            if(it.hasNext()) {
-                // Desenhar o texto da correspondência
-                if(rule.useForegroundColor)
-                    painter->setPen(rule.foregroundColor);
-            }
-            while (it.hasNext()) {
-                QRegularExpressionMatch match = it.next();
-                int start = match.capturedStart();
-
-                // Desenhar o texto destacado
-                QString matchedText = match.captured();
-                QRect matchRect(x + metrics.horizontalAdvance(displayText.left(start)), opt.rect.y(),
-                                metrics.horizontalAdvance(matchedText), opt.rect.height());
-
-                // Desenhar o fundo da correspondência
-                if(rule.useBackgroundColor) {
-                    painter->fillRect(matchRect, rule.backgroundColor);
+        // Iterar sobre as regras de highlight na ordem inversa e aplicar os destaques
+        for (auto it = m_highlightRules->rbegin(); it != m_highlightRules->rend(); ++it) {
+            const auto &rule = *it;
+            QRegularExpressionMatchIterator matchIterator = rule.regex.globalMatch(displayText);
+            while (matchIterator.hasNext()) {
+                QRegularExpressionMatch match = matchIterator.next();
+                QTextLayout::FormatRange formatRange;
+                formatRange.start = match.capturedStart();
+                formatRange.length = match.capturedLength();
+                if (rule.useForegroundColor) {
+                    formatRange.format.setForeground(rule.foregroundColor);
                 }
-
-                painter->drawText(matchRect, Qt::AlignLeft | Qt::AlignVCenter, matchedText);
+                if (rule.useBackgroundColor) {
+                    formatRange.format.setBackground(rule.backgroundColor);
+                }
+                formats.append(formatRange);
             }
         }
 
-        // Restaurar o estado do painter
-        painter->restore();
-    }
-private:
+        textLayout.setFormats(formats);
+        textLayout.beginLayout();
+        QTextLine line = textLayout.createLine();
+        if (line.isValid()) {
+            line.setLineWidth(opt.rect.width());
+            line.setPosition(QPointF(0, 0));
+        }
+        textLayout.endLayout();
 
+        // Desenhar o layout do texto na posição correta
+        painter->translate(opt.rect.topLeft());
+        textLayout.draw(painter, QPointF(0, (opt.rect.height() - metrics.height()) / 2));
+        painter->translate(-opt.rect.topLeft());
+
+        painter->restore();  // Restaurar o estado do QPainter
+    }
+
+private:
     QColor m_selectionColor;
+    QColor m_hoverColor;
     QList<HighlightRule> *m_highlightRules;
 };
-
 
 #endif // LOGITEMDELEGATE_HPP
