@@ -129,7 +129,7 @@ private:
             connect(editButton, &QPushButton::clicked, this, [=, this]() { editRule(i); });
             actionLayout->addWidget(editButton);
 
-            if(i >= 2) {  // Não permitir excluir as duas primeiras regras
+            if(i >= 1) {  // Não permitir excluir a primeira regra (highlight do filtro)
                 QPushButton *deleteButton = new QPushButton(actionWidget);
                 deleteButton->setIcon(QIcon::fromTheme(QIcon::ThemeIcon::EditDelete));
                 //deleteButton->setText("❌");

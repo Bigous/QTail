@@ -14,7 +14,7 @@
 #include "HighlightRuleManager.hpp"
 
 TailFileWidget::TailFileWidget(const QString& filePath, FixDictionary *fixDictionary, QWidget* parent)
-    : QDockWidget(parent), fixRegex(QRegularExpression("8=FIX.*\u2401")) {
+    : QDockWidget(parent), fixRegex(QRegularExpression("8=FIX.*\u0001")) {
 
     setAllowedAreas(Qt::AllDockWidgetAreas);
     setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetClosable);
@@ -27,9 +27,10 @@ TailFileWidget::TailFileWidget(const QString& filePath, FixDictionary *fixDictio
 
     // Default Highlights
     // filter
-    m_highlightRules.push_back({QRegularExpression(""), true, Qt::white, true, QColor::fromRgbF(0, 0.5, 0)});
+    m_highlightRules.push_back({QRegularExpression(""), true, Qt::white, true, Qt::darkGreen});
     // control chars
-    m_highlightRules.push_back({QRegularExpression("[\u2400-\u240F]"), true, Qt::white, true, QColor::fromRgbF(0.5, 0, 0)});
+    // m_highlightRules.push_back({QRegularExpression("[\u2400-\u240F]"), true, Qt::white, true, Qt::darkRed});
+    // m_highlightRules[1].regex.optimize();
 
     m_fixDictionary = fixDictionary;
 
@@ -38,7 +39,7 @@ TailFileWidget::TailFileWidget(const QString& filePath, FixDictionary *fixDictio
     fixTable = new QTableWidget(this);
 
     // Carregar a fonte personalizada
-    int fontId = QFontDatabase::addApplicationFont("./assets/fonts/CaskaydiaMonoNerdFont-Light.ttf");
+    int fontId = QFontDatabase::addApplicationFont("./assets/fonts/CommitMonoNerdFontMono-Regular.otf");
     if (fontId != -1) {
         QString fontFamily = QFontDatabase::applicationFontFamilies(fontId).at(0);
         QFont customFont(fontFamily);
@@ -143,11 +144,18 @@ TailFileWidget::TailFileWidget(const QString& filePath, FixDictionary *fixDictio
 
 void TailFileWidget::applyFilter(const QString& filterText) {
     if(regexCheckBox->isChecked()) {
-        regexProxyModel->setFilter(filterText);
-        m_highlightRules[0].regex.setPattern(filterText);
+        if(regexProxyModel->setFilter(filterText)) {
+            m_highlightRules[0].regex.setPattern(filterText);
+            m_highlightRules[0].regex.optimize();
+            filterEdit->setStyleSheet("");
+        } else {
+            filterEdit->setStyleSheet("color: red;");
+        }
     } else {
         containsProxyModel->setFilter(filterText);
         m_highlightRules[0].regex.setPattern(QRegularExpression::escape(filterText));
+        m_highlightRules[0].regex.optimize();
+        filterEdit->setStyleSheet("");
     }
     QMetaObject::invokeMethod(listView, "repaint", Qt::QueuedConnection);
 }
@@ -155,7 +163,7 @@ void TailFileWidget::applyFilter(const QString& filterText) {
 
 void TailFileWidget::processFixLine(const QString& line) {
     // Exemplo simples de processamento de uma linha do protocolo FIX
-    QStringList fields = line.split("\u2401");
+    QStringList fields = line.split("\u0001");
     fixTable->setRowCount(fields.size());
 
     int row = 1;

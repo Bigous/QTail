@@ -36,9 +36,14 @@ public:
         : QSortFilterProxyModel(parent) {
     }
 
-    void setFilter(const QString& pattern) {
+    bool setFilter(const QString& pattern) {
+        QRegularExpression regexTest(pattern);
+        if (!regexTest.isValid()) {
+            return false;
+        }
         m_regex.setPattern(pattern);
         invalidateFilter(); // Reaplica o filtro
+        return true;
     }
 
 protected:

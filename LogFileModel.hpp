@@ -18,7 +18,7 @@ class LogFileModel : public QAbstractListModel {
 
 public:
     explicit LogFileModel(const QString& filePath, QObject *parent = nullptr)
-        : QAbstractListModel(parent), m_file(filePath), m_fileName(filePath), m_controlChars("[\\x00-\\x1F]") {
+        : QAbstractListModel(parent), m_file(filePath), m_fileName(filePath) {
 
     }
 
@@ -67,24 +67,7 @@ public:
         if (role != Qt::DisplayRole)
             return QVariant();
 
-        QString displayText = QString::fromUtf8(m_lines[index.row()]);
-
-        QRegularExpressionMatchIterator it = m_controlChars.globalMatch(displayText);
-
-        // Iterar sobre cada correspondência de caractere de controle
-        while (it.hasNext()) {
-            QRegularExpressionMatch match = it.next();
-            char controlChar = match.captured(0).at(0).toLatin1();
-
-            // Substituir o caractere de controle pelo correspondente na faixa 0x2400
-            QString replacement = QString(QChar(0x2400 + controlChar));
-
-            // Substituir o caractere no texto original
-            displayText.replace(match.capturedStart(0), 1, replacement);
-        }
-
-        return displayText;
-        //return QByteArray(m_lines[index.row()].data(), m_lines[index.row()].size());
+        return QString::fromUtf8(m_lines[index.row()]);
     }
 
     int getMaxLineSize() const {
@@ -106,7 +89,6 @@ private:
     QCoro::Task<void> m_task;
     bool m_lastLineWasIncomplete = false;
     bool m_stopRequested = false;
-    QRegularExpression m_controlChars;
     int m_maxLineSize = 0;
 
     void processBuffer(QByteArray& buffer)
@@ -158,10 +140,14 @@ private:
             co_return;
         }
 
+        qDebug() << "Start reading file " << m_fileName;
+
         // Carga inicial de todas as linhas já existentes no arquivo
         m_buffers.emplace_back(m_file.readAll());
 
         processBuffer(m_buffers.back());
+
+        qDebug() << "End reading file " << m_fileName;
 
         QCoro::detail::QCoroIODevice coroDevice{&m_file};
 
